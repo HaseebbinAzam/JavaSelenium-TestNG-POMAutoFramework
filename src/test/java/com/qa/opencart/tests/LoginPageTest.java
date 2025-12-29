@@ -22,10 +22,10 @@ import io.qameta.allure.Story;
 //@Listeners({ExtentReportListener.class, TestAllureListener.class}) //- only report will work, retry is not working here
 public class LoginPageTest extends BaseTest {
     
-	@Description("checking login page title-----")
+	@Description("validating the login page title-----")
 	@Severity(SeverityLevel.MINOR)
 	@Owner("Mohammad Haseeb A")
-	@Issue("PID-123")
+	@Issue("PID-1234")
 	@Feature("login page title feature")
 	@Test(priority = 1)
 	public void loginPageTitleTest() {
