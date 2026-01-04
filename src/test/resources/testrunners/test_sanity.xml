@@ -1,17 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
-<suite name="Opencart App Test Regression Suite" thread-count="3"
-   parallel="tests" verbose="4">
-   
-    <test name="Register Page Test">
+<suite name="Opencart App Test Sanity Suite" thread-count="3"
+	parallel="tests" verbose="4">
+
+
+	<listeners>
+
+		<listener
+			class-name="com.qa.opencart.listeners.ExtentReportListener" />
+		<listener
+			class-name="com.qa.opencart.listeners.TestAllureListener" />
+		<listener
+			class-name="com.qa.opencart.listeners.AnnotationTransformer" />
+		<!--<listener class-name="com.qa.opencart.listeners.FrameworkListener" 
+			/> -->
+	</listeners>
+
+	<!-- <test name="Register Page Test"> <parameter name="browser" value="chrome"></parameter> 
+		<classes> <class name="com.qa.opencart.tests.RegisterPageTest" /> </classes> 
+		</test> -->
+
+	<test name="Login Page Test">
 		<parameter name="browser" value="chrome"></parameter>
-		
+
 		<classes>
-			<class name="com.qa.opencart.tests.RegisterPageTest" />
+			<class name="com.qa.opencart.tests.LoginPageTest" />
 		</classes>
-		
+
 	</test>
- 
-   
-   </suite>
+
+
+</suite>
