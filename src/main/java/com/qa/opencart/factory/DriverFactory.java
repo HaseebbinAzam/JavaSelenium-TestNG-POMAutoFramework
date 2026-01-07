@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.Properties;
 
 import org.openqa.selenium.OutputType;
@@ -13,6 +15,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.io.FileHandler;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
 
 import com.qa.opencart.constants.AppConstants;
@@ -44,15 +47,36 @@ public class DriverFactory {
 		System.out.println("browser name is: " + browserName);
 		switch (browserName.toLowerCase().trim()) {
 		case "chrome":
-			tlDriver.set(new ChromeDriver(optionsManager.getChromeOptions()));
+			if(Boolean.parseBoolean(prop.getProperty("remote"))) {
+				//runs TC's on remote machine/grid
+				initRemoteDriver("chrome");
+			} 
+			else {
+				//run on local
+				tlDriver.set(new ChromeDriver(optionsManager.getChromeOptions()));
+			}
 			break;
 
 		case "firefox":
-			tlDriver.set(new FirefoxDriver(optionsManager.getFirefoxOptions()));
+			if(Boolean.parseBoolean(prop.getProperty("remote"))) {
+				//runs TC's on remote machine/grid
+				initRemoteDriver("firefox");
+			} 
+			else {
+				//run on local
+				tlDriver.set(new FirefoxDriver(optionsManager.getFirefoxOptions()));
+			}
 			break;
 
 		case "edge":
-			tlDriver.set(new EdgeDriver(optionsManager.getEdgeOptions()));
+			if(Boolean.parseBoolean(prop.getProperty("remote"))) {
+				//runs TC's on remote machine/grid
+				initRemoteDriver("edge");
+			} 
+			else {
+				//run on local
+				tlDriver.set(new EdgeDriver(optionsManager.getEdgeOptions()));
+			}
 			break;
 
 		case "safari":
@@ -73,6 +97,50 @@ public class DriverFactory {
 
 	}
 	
+	/**
+	 * init remote driver to run test cases on remote(grid) machine
+	 * @param browserName
+	 */
+	
+	private void initRemoteDriver(String browserName) {
+		System.out.println("Running it on GRID...with browser: " + browserName);
+		switch (browserName) {
+		case "chrome":
+			try {
+			URI hubUri = URI.create(prop.getProperty("huburl"));
+			tlDriver.set(new RemoteWebDriver(hubUri.toURL(),optionsManager.getChromeOptions()));
+			}
+			catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
+			break;
+			
+		case "firefox":
+			try {
+			URI hubUri = URI.create(prop.getProperty("huburl"));
+			tlDriver.set(new RemoteWebDriver(hubUri.toURL(),optionsManager.getFirefoxOptions()));
+			}
+			catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
+			break;
+			
+		case "edge":
+			try {
+				URI hubUri = URI.create(prop.getProperty("huburl"));
+				tlDriver.set(new RemoteWebDriver(hubUri.toURL(),optionsManager.getEdgeOptions()));
+			}
+			catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
+			break;
+
+		default:
+			System.out.println("please pass the right browser on GRID...");
+			throw new BrowserException(AppError.BROWSER_NOT_FOUND);
+		}
+	}
+
 	/**
 	 * get the local thread copy of the driver
 	 * @return
@@ -142,19 +210,43 @@ public class DriverFactory {
 	}
 	
 	
+	/**
+	 * take screenshot
+	 */
+	
 	public static String getScreenshot(String methodName) {
-		File srcFile = ((TakesScreenshot)getDriver()).getScreenshotAs(OutputType.FILE);
 		
-		String path = System.getProperty("user.dir")+"/screenshots/"+methodName+"_"+System.currentTimeMillis()+".png";
-		
-		File destination = new File(path);
-		try {
-			FileHandler.copy(srcFile, destination);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		return path;
+		// Get the driver instance
+        TakesScreenshot screenshotTaker = (TakesScreenshot) getDriver();
+        
+        // Take the screenshot and save it to a temporary location
+        File srcFile = screenshotTaker.getScreenshotAs(OutputType.FILE);
+        
+        // Define the path for the screenshots folder
+        String screenshotsDirPath = System.getProperty("user.dir") + "/screenshots";
+        
+        // Create the screenshots folder if it doesn't exist
+        File screenshotsDir = new File(screenshotsDirPath);
+        if (!screenshotsDir.exists()) {
+            if (screenshotsDir.mkdirs()) {
+                System.out.println("Folder 'screenshots' created successfully at: " + screenshotsDirPath);
+            } else {
+                System.out.println("Failed to create the folder 'screenshots' at: " + screenshotsDirPath);
+            }
+        }
+
+        // Define the destination path for the screenshot
+        String screenshotPath = screenshotsDirPath + "/" + methodName + "_" + System.currentTimeMillis() + ".png";
+        File destination = new File(screenshotPath);
+
+        // Copy the screenshot to the destination path
+        try {
+            FileHandler.copy(srcFile, destination);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return destination.getAbsolutePath();
 	}
 	
 

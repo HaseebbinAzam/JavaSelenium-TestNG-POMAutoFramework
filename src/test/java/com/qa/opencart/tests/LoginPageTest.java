@@ -65,4 +65,8 @@ public class LoginPageTest extends BaseTest {
 		Assert.assertEquals(actAccPageTitle, AppConstants.ACCOUNTS_PAGE_TITLE, AppError.TITLE_NOT_FOUND);
 	}
 
+	@Test
+	public void mytest() {
+		Assert.assertEquals(false, true);
+	}
 } 
